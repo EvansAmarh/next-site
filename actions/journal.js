@@ -3,7 +3,7 @@
 import { getMoodById, MOODS } from "@/app/lib/moods";
 import { auth } from "@clerk/nextjs/server";
 import { getPixabayImage } from "./public";
-import supabase from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
 import { revalidatePath } from "next/cache";
 
 export async function createJournalEntry(data) {
@@ -12,9 +12,9 @@ export async function createJournalEntry(data) {
     if (!userId) throw new Error("Unauthorized");
 
     const { data: user, error: userError } = await supabase
-      .from("user")
+      .from("users")
       .select("id")
-      .eq("clerkUserId", userId)
+      .eq("clerk_user_id", userId)
       .single();
 
     if (userError || !user) throw new Error("User not found");
@@ -31,16 +31,16 @@ export async function createJournalEntry(data) {
           title: data.title,
           content: data.content,
           mood: mood.id,
-          moodScore: mood.score,
-          moodImageUrl,
-          userId: user.id,
-          collectionId: data.collectionId || null,
+          mood_score: mood.score,
+          mood_image_url: moodImageUrl,
+          user_id: user.id,
+          collection_id: data.collection_id || null,
         },
       ])
       .select()
       .single();
 
-    await supabase.from("drafts").delete().eq("userId", user.id);
+    await supabase.from("drafts").delete().eq("user_id", user.id);
 
     revalidatePath("/dashboard");
     return entry;
@@ -50,34 +50,34 @@ export async function createJournalEntry(data) {
   }
 }
 
-export async function getJournalEntries({ collectionId, orderBy = "desc" } = {}) {
+export async function getJournalEntries({ collection_id, orderBy = "desc" } = {}) {
   try {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
     const { data: user, error: userError } = await supabase
-      .from("user")
+      .from("users")
       .select("id")
-      .eq("clerkUserId", userId)
+      .eq("clerk_user_id", userId)
       .single();
 
     if (userError || !user) throw new Error("User not found");
 
     const query = supabase
       .from("entries")
-      .select("*, collection(id, name)")
-      .eq("userId", user.id)
-      .order("createdAt", { ascending: orderBy === "asc" });
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: orderBy === "asc" });
 
-    if (collectionId === "unorganized") query.is("collectionId", null);
-    else if (collectionId) query.eq("collectionId", collectionId);
+    if (collection_id === "unorganized") query.is("collection_id", null);
+    else if (collection_id) query.eq("collection_id", collection_id);
 
     const { data: entries, error } = await query;
     if (error) throw new Error(error.message);
 
     const entriesWithMoodData = entries.map((entry) => ({
       ...entry,
-      moodData: getMoodById(entry.mood),
+      mood_data: getMoodById(entry.mood),
     }));
 
     return { success: true, data: { entries: entriesWithMoodData } };
@@ -92,18 +92,18 @@ export async function getJournalEntry(id) {
     if (!userId) throw new Error("Unauthorized");
 
     const { data: user } = await supabase
-      .from("user")
+      .from("users")
       .select("id")
-      .eq("clerkUserId", userId)
+      .eq("clerk_user_id", userId)
       .single();
 
     if (!user) throw new Error("User not found");
 
     const { data: entry, error } = await supabase
       .from("entries")
-      .select("*, collection(id, name)")
+      .select("*")
       .eq("id", id)
-      .eq("userId", user.id)
+      .eq("user_id", user.id)
       .single();
 
     if (error || !entry) throw new Error("Entry not found");
@@ -119,16 +119,16 @@ export async function deleteJournalEntry(id) {
     if (!userId) throw new Error("Unauthorized");
 
     const { data: user } = await supabase
-      .from("user")
+      .from("users")
       .select("id")
-      .eq("clerkUserId", userId)
+      .eq("clerk_user_id", userId)
       .single();
 
     const { error } = await supabase
       .from("entries")
       .delete()
       .eq("id", id)
-      .eq("userId", user.id);
+      .eq("user_id", user.id);
 
     if (error) throw new Error(error.message);
 
@@ -145,16 +145,16 @@ export async function updateJournalEntry(data) {
     if (!userId) throw new Error("Unauthorized");
 
     const { data: user } = await supabase
-      .from("user")
+      .from("users")
       .select("id")
-      .eq("clerkUserId", userId)
+      .eq("clerk_user_id", userId)
       .single();
 
     const { data: existingEntry } = await supabase
       .from("entries")
       .select("*")
       .eq("id", data.id)
-      .eq("userId", user.id)
+      .eq("user_id", user.id)
       .single();
 
     if (!existingEntry) throw new Error("Entry not found");
@@ -162,7 +162,7 @@ export async function updateJournalEntry(data) {
     const mood = MOODS[data.mood.toUpperCase()];
     if (!mood) throw new Error("Invalid mood");
 
-    let moodImageUrl = existingEntry.moodImageUrl;
+    let moodImageUrl = existingEntry.mood_image_url;
     if (existingEntry.mood !== mood.id)
       moodImageUrl = await getPixabayImage(data.moodQuery);
 
@@ -172,9 +172,9 @@ export async function updateJournalEntry(data) {
         title: data.title,
         content: data.content,
         mood: mood.id,
-        moodScore: mood.score,
-        moodImageUrl,
-        collectionId: data.collectionId || null,
+        mood_score: mood.score,
+        mood_image_url: moodImageUrl,
+        collection_id: data.collection_id || null,
       })
       .eq("id", data.id)
       .select()
@@ -196,15 +196,15 @@ export async function getDraft() {
     if (!userId) throw new Error("Unauthorized");
 
     const { data: user } = await supabase
-      .from("user")
+      .from("users")
       .select("id")
-      .eq("clerkUserId", userId)
+      .eq("clerk_user_id", userId)
       .single();
 
     const { data: draft, error } = await supabase
       .from("drafts")
       .select("*")
-      .eq("userId", user.id)
+      .eq("user_id", user.id)
       .single();
 
     if (error) throw new Error(error.message);
@@ -220,19 +220,22 @@ export async function saveDraft(data) {
     if (!userId) throw new Error("Unauthorized");
 
     const { data: user } = await supabase
-      .from("user")
+      .from("users")
       .select("id")
-      .eq("clerkUserId", userId)
+      .eq("clerk_user_id", userId)
       .single();
 
     const { data: draft, error } = await supabase
       .from("drafts")
-      .upsert({
-        userId: user.id,
-        title: data.title,
-        content: data.content,
-        mood: data.mood,
-      }, { onConflict: ["userId"] })
+      .upsert(
+        {
+          user_id: user.id,
+          title: data.title,
+          content: data.content,
+          mood: data.mood,
+        },
+        { onConflict: ["user_id"] }
+      )
       .select()
       .single();
 

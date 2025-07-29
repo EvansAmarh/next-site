@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
@@ -11,9 +11,9 @@ export async function getCollections() {
 
   // Get user row using Clerk userId
   const { data: user, error: userError } = await supabase
-    .from("user")
+    .from("users")
     .select("id")
-    .eq("clerkUserId", userId)
+    .eq("clerk_user_id", userId)
     .single();
 
   if (userError || !user) throw new Error("User not found");
@@ -22,8 +22,8 @@ export async function getCollections() {
   const { data: collections, error } = await supabase
     .from("collections")
     .select("*")
-    .eq("userId", user.id)
-    .order("createdAt", { ascending: false });
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
 
@@ -36,9 +36,9 @@ export async function createCollection(data) {
   if (!userId) throw new Error("Unauthorized");
 
   const { data: user, error: userError } = await supabase
-    .from("user")
+    .from("users")
     .select("id")
-    .eq("clerkUserId", userId)
+    .eq("clerk_user_id", userId)
     .single();
 
   if (userError || !user) throw new Error("User not found");
@@ -49,7 +49,7 @@ export async function createCollection(data) {
       {
         name: data.name,
         description: data.description,
-        userId: user.id,
+        user_id: user.id,
       },
     ])
     .select()
@@ -67,9 +67,9 @@ export async function deleteCollection(id) {
   if (!userId) throw new Error("Unauthorized");
 
   const { data: user, error: userError } = await supabase
-    .from("user")
+    .from("users")
     .select("id")
-    .eq("clerkUserId", userId)
+    .eq("clerk_user_id", userId)
     .single();
 
   if (userError || !user) throw new Error("User not found");
@@ -79,7 +79,7 @@ export async function deleteCollection(id) {
     .from("collections")
     .select("id")
     .eq("id", id)
-    .eq("userId", user.id)
+    .eq("user_id", user.id)
     .single();
 
   if (collectionError || !collection) throw new Error("Collection not found");
@@ -88,5 +88,6 @@ export async function deleteCollection(id) {
   const { error } = await supabase.from("collections").delete().eq("id", id);
   if (error) throw new Error(error.message);
 
+  revalidatePath("/dashboard");
   return true;
 }

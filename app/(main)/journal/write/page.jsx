@@ -42,10 +42,10 @@ const JournalEntryPage = () => {
   } = useFetch(getDraft);
 
   const {
-    laoding: savingDraft, 
-    fn: saveDraftFn,
-    data: savedDraft
-  } = useFetch(saveDraft);
+  loading: savingDraft, 
+  fn: saveDraftFn,
+  data: savedDraft
+} = useFetch(saveDraft);
 
 
   const {
@@ -76,7 +76,7 @@ const JournalEntryPage = () => {
         title: "",
         content: "",
         mood: "",
-        collectionId: "",
+        collection_id: "",
     },
   });
 
@@ -84,7 +84,7 @@ const JournalEntryPage = () => {
     fetchCollections();
     if (editId) {
       setIsEditMode(true);
-      fetchEntry();
+      fetchEntry(editId);
     } else {
       setIsEditMode(false);
       fetchDraft();
@@ -97,21 +97,21 @@ const JournalEntryPage = () => {
         title: existingEntry.title || "",
         content: existingEntry.content || "",
         mood: existingEntry.mood || "",
-        collectionId: existingEntry.collection || "",
+        collection_id: existingEntry.collection || "",
       });
     } else if (draftData?.success && draftData?.data) {
       reset({
         title: draftData.data.title || "",
         content: draftData.data.content || "",
         mood: draftData.data.mood || "",
-        collectionId: "",
+        collection_id: "",
       });
     } else {
       reset({
         title:  "",
         content:  "",
         mood:  "",
-        collectionId: "",
+        collection_id: "",
       })
     }
   },[draftData, isEditMode, existingEntry])
@@ -126,7 +126,7 @@ const JournalEntryPage = () => {
          mood:  "",
         })
       }
-      router.push(`/collection/${actionResult.collectionId?actionResult.collectionId : "unorganized"}`);
+      router.push(`/collection/${actionResult.collection_id?actionResult.collection_id : "unorganized"}`);
       toast.success(`Entry ${isEditMode ? "updated" : "created"} successfully`)
     }   
   }, [actionResult, actionLoading])
@@ -144,13 +144,14 @@ const JournalEntryPage = () => {
   });
 
   useEffect(() => {
-    if(createCollection) {
-      setIsCollectionDialogOpen(false);
-      fetchCollections();
-      setValue("collectionId", createdCollection?.id);
-      toast.success(`Collection ${createdCollection?.name} created!`);
-    }
-  }, [createCollection]);
+  if (createdCollection) {
+    setIsCollectionDialogOpen(false);
+    fetchCollections();
+    setValue("collection_id", createdCollection?.id);
+    toast.success(`Collection ${createdCollection?.name} created!`);
+  }
+}, [createdCollection]);
+
 
   const handleCreateCollection = async (data) => {
     createCollectionFn(data)
@@ -163,7 +164,7 @@ const JournalEntryPage = () => {
       toast.error("No changes to save");
       return;
     }
-    await saveDraftFn(FormData);
+    await saveDraftFn(formData);
   };
 
   useEffect(() => {
@@ -251,17 +252,21 @@ const JournalEntryPage = () => {
             <div className='space-y-2'>
                 <label className='text-sm font-medium'>Add to Collection (Optional)</label>
                  <Controller 
-                 name="collectionId"
+                 name="collection_id"
                  control={control}
                  render={({field}) => {
                   return (
-                    <Select onValueChange={(value)=>{
-                      if(value==="new") {
-                        setIsCollectionDialogOpen(true)
-                      } else {
-                        field.onChange(value);
-                      }
-                      }} value={field.value}>
+                    <Select
+  onValueChange={(value) => {
+    if (value === "new") {
+      setIsCollectionDialogOpen(true);
+    } else {
+      field.onChange(value);
+    };
+
+  }}
+  value={field.value ?? ""}
+>
                       <SelectTrigger>
                         <SelectValue placeholder="Choose a collection..." />
                       </SelectTrigger>
@@ -281,8 +286,8 @@ const JournalEntryPage = () => {
                   )
                 }}
                 />
-                {errors.collectionId && (
-                  <p className='text-red-500 text-sm'>{errors.collectionId.message}</p>
+                {errors.collection_id && (
+                  <p className='text-red-500 text-sm'>{errors.collection_id.message}</p>
                 )}                             
             </div>
             <div className='space-x-4 flex'>
@@ -301,7 +306,7 @@ const JournalEntryPage = () => {
               <Button
               onClick={(e) => {
                 e.preventDefault();
-                router.push(`/journal/${existingEntry.id}`);
+                router.back();
               }} variant="destructive"
               >
                 Cancel

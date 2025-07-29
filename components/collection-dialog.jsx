@@ -12,17 +12,18 @@ import { Input } from './ui/input';
 
 const CollectionForm = ({ onSuccess, open, setOpen, loading }) => {
 
-    const {register, handleSubmit, formState: {errors},} = useForm({
-      resolver: zodResolver(collectionSchema),
-      defaultValues: {
-        name: "",
-        description: "",
-      },
-    });
+    const { register, handleSubmit, formState: { errors }, reset } = useForm({
+  resolver: zodResolver(collectionSchema),
+  defaultValues: {
+    name: '',
+    description: '',
+  },
+});
 
-    const onSubmit=handleSubmit(async(data)=>{
-        onSuccess(data);
-    })
+const onSubmit = handleSubmit(async (data) => {
+  await onSuccess(data);
+  reset();
+});
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

@@ -14,9 +14,9 @@ const JournalEntryPage = async ({params}) => {
   const mood = getMoodById(entry.mood);
   return (
     <>
-     {entry.moodImageUrl && (
+     {entry.mood_image_url && (
         <div className='relative h-48 md:h-64 w-full'>
-            <Image src={entry.moodImageUrl} alt='Mood visualization' className='object-contain' fill priority />
+            <Image src={entry.mood_image_url} alt='Mood visualization' className='object-contain' fill priority />
         </div>
      )}
      <div className='p-6 space-y-6'>
@@ -24,7 +24,7 @@ const JournalEntryPage = async ({params}) => {
             <div className='flex flex-wrap items-center justify-between gap-4'>
                 <div className='space-y-1'>
                     <h1 className='text-5xl font-bold gradient-title'>{entry.title}</h1>
-                    <p className='text-gray-500'>Created {format(new Date(entry.createdAt), "PPP")}</p>
+                    <p className='text-gray-500'>Created {format(new Date(entry.created_at), "PPP")}</p>
                 </div>
 
                 <div className='flex items-center gap-2'>
@@ -33,9 +33,9 @@ const JournalEntryPage = async ({params}) => {
                 </div>
             </div>
             <div className='flex flex-wrap gap-2'>
-                {entry.collection && (
-                    <Link href={`/collection/${entry.collection.id}`}>
-                        <Badge>Collection: {entry.collection.name}</Badge>
+                {entry?.collection && (
+                    <Link href={`/collection/${entry?.collection.id}`}>
+                        <Badge>Collection: {entry?.collection.name}</Badge>
                     </Link>
                 )}
                 <Badge 
@@ -55,7 +55,7 @@ const JournalEntryPage = async ({params}) => {
             <div className='ql-editor' dangerouslySetInnerHTML={{__html: entry.content}} />
         </div>
         <div className='text-sm text-gray-500 pt-4 border-t'>
-            Last updated {format(new Date(entry.updateAt), "PPP 'at' p")}
+            Last updated {format(new Date(entry.updated_at), "PPP 'at' p")}
         </div>
      </div>
     </>

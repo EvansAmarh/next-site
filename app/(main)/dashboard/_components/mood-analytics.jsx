@@ -26,7 +26,7 @@ const MoodAnalytics = () => {
     fn: fetchAnalytics,
   } = useFetch(getAnalytics)
 
-  console.log(analytics);
+  // console.log(analytics);  
 
   const {isLoaded} = useUser();
 

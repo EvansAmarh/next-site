@@ -16,10 +16,10 @@ const JournalFilters = ({entries}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMood, setSelectedMood] = useState("");
   const [date, setDate] = useState(null);
-  const [filteredEntries, setFilteredEntries] = useState(entries);
+  const [filteredEntries, setFilteredEntries] = useState(entries||[]);
 
   useEffect(() => {
-   let filtered = entries;
+   let filtered = entries||[];
    if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -36,16 +36,17 @@ const JournalFilters = ({entries}) => {
   },[entries, searchQuery, selectedMood, date]);
   
   const clearFilters = () => {
-    searchQuery("");
-    selectedMood("");
-    filteredEntries(null);
-  }
+  setSearchQuery("");
+  setSelectedMood("");
+  setDate(null);
+};
+
 
   return (
     <>
      <div className='flex flex-wrap gap-4'>
         <div className='flex-1 min-w-[200px]'>
-            <Input placeholder="Search entries..." value={searchQuery} onChange={(e)=>searchQuery(e.target.value)} className="w-full"
+            <Input placeholder="Search entries..." value={searchQuery} onChange={(e)=>setSearchQuery(e.target.value)} className="w-full"
             prefix={<Search className='h-4 w-4 text-gray-400' />}
             />
         </div>

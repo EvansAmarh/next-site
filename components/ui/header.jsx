@@ -1,15 +1,51 @@
 "use client";
 
-import { SignedIn, SignedOut, SignInButton, useUser } from '@clerk/nextjs';
-import Image from 'next/image';
-import Link from 'next/link';
-import React from 'react';
-import { Button } from './button';
-import { FolderOpen, PenBox } from 'lucide-react';
-import UserMenu from '../user-menu';
+import { useUser } from "@clerk/nextjs";
+import { useEffect } from "react";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import Image from "next/image";
+import Link from "next/link";
+import { Button } from "./button";
+import { FolderOpen, PenBox } from "lucide-react";
+import UserMenu from "../user-menu";
+import { supabase } from "@/lib/supabaseClient";
 
 const Header = () => {
   const { isSignedIn, user } = useUser();
+
+  useEffect(() => {
+    const syncUserToSupabase = async () => {
+      if (!user) return;
+
+      try {
+        const { data: existingUser, error: findError } = await supabase
+          .from("users")
+          .select("id")
+          .eq("clerk_user_id", user.id)
+          .single();
+
+        if (!existingUser || findError?.code === "PGRST116") {
+          const name = `${user.firstName || ""} ${user.lastName || ""}`.trim();
+
+          const { error: insertError } = await supabase.from("users").insert([
+            {
+              clerk_user_id: user.id,
+              email: user.emailAddresses[0]?.emailAddress,
+              name,
+              image_url: user.imageUrl,
+            },
+          ]);
+
+          if (insertError) throw insertError;
+          console.log("✅ User synced to Supabase");
+        }
+      } catch (error) {
+        console.error("❌ Error syncing user to Supabase:", error.message);
+      }
+    };
+
+    if (isSignedIn) syncUserToSupabase();
+  }, [isSignedIn, user]);
 
   return (
     <header className="container mx-auto">

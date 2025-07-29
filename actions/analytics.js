@@ -1,52 +1,49 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import supabase from "@/lib/supabaseClient";
+import {supabase} from "@/lib/supabaseClient";
 
 export async function getAnalytics(period = "30d") {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
-  // Get the user from Supabase
-  const { data: users, error: userError } = await supabase
-    .from("user")
-    .select("*")
-    .eq("clerkUserId", userId)
-    .limit(1)
+  // Get user from Supabase
+  const { data: user, error: userError } = await supabase
+    .from("users")
+    .select("id")
+    .eq("clerk_user_id", userId)
     .single();
 
-  if (userError || !users) throw new Error("User not found");
+  if (userError || !user) throw new Error("User not found");
 
-  const user = users;
-
-  // Calculate start date
+  // Determine start date
   const startDate = new Date();
   switch (period) {
     case "7d":
       startDate.setDate(startDate.getDate() - 7);
       break;
-    case "15":
+    case "15d":
       startDate.setDate(startDate.getDate() - 15);
       break;
-    case "30":
+    case "30d":
     default:
       startDate.setDate(startDate.getDate() - 30);
       break;
   }
 
-  // Fetch entries from Supabase
+  // Fetch entries
   const { data: entries, error: entryError } = await supabase
-    .from("entry")
+    .from("entries")
     .select("*")
-    .eq("userId", user.id)
-    .gte("createdAt", startDate.toISOString())
-    .order("createdAt", { ascending: true });
+    .eq("user_id", user.id)
+    .gte("created_at", startDate.toISOString())
+    .order("created_at", { ascending: true });
 
   if (entryError || !entries) throw new Error("Failed to fetch entries");
 
-  // Group and calculate mood data
+  // Group by date and calculate mood analytics
   const moodData = entries.reduce((acc, entry) => {
-    const date = entry.createdAt.split("T")[0];
+    const date = entry.created_at.split("T")[0];
     if (!acc[date]) {
       acc[date] = {
         totalScore: 0,
@@ -54,7 +51,7 @@ export async function getAnalytics(period = "30d") {
         entries: [],
       };
     }
-    acc[date].totalScore += entry.moodScore;
+    acc[date].totalScore += entry.mood_score;
     acc[date].count += 1;
     acc[date].entries.push(entry);
     return acc;
@@ -66,11 +63,12 @@ export async function getAnalytics(period = "30d") {
     entryCount: data.count,
   }));
 
+  // Overall stats
   const overallStats = {
     totalEntries: entries.length,
     averageScore: Number(
       (
-        entries.reduce((acc, entry) => acc + entry.moodScore, 0) /
+        entries.reduce((acc, entry) => acc + entry.mood_score, 0) /
         entries.length
       ).toFixed(1)
     ),
@@ -82,7 +80,8 @@ export async function getAnalytics(period = "30d") {
     ).sort((a, b) => b[1] - a[1])[0]?.[0],
     dailyAverage: Number(
       (
-        entries.length / (period === "7d" ? 7 : period === "15d" ? 15 : 30)
+        entries.length /
+        (period === "7d" ? 7 : period === "15d" ? 15 : 30)
       ).toFixed(1)
     ),
   };
