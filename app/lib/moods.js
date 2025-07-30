@@ -40,7 +40,7 @@ export const MOODS = {
     label: "Loved",
     emoji: "🥰",
     score: 9,
-    color: "pink",
+    color: "blue",
     prompt: "Who or what is making you feel loved?",
     pixabayQuery: "love+heart+affection",
   },

@@ -9,7 +9,7 @@ import { Card, CardContent } from './ui/card';
 const TestimonialCarousel = () => {
   return (
     <div className='mt-24'>
-        <h2 className='text-3xl font-bold text-center text-pink-900 mb-12'>What Our Writers Say</h2>
+        <h2 className='text-3xl font-bold text-center text-blue-900 mb-12'>What Our Writers Say</h2>
         <Carousel
          plugins={[
             Autoplay({
@@ -23,10 +23,10 @@ const TestimonialCarousel = () => {
                 <Card className="bg-white/80 backdrop-blur-sm">
                   <CardContent className="p-6">
                     <blockquote className='space-y-4'>
-                      <p className='text-pink-700 italic'>&quot; {testimonial.text}&quot;</p>
+                      <p className='text-blue-700 italic'>&quot; {testimonial.text}&quot;</p>
                       <footer>
-                        <div className='font-semibold text-pink-900'>{testimonial.author}</div>
-                        <div className='text-sm text-pink-600'>{testimonial.role}</div>
+                        <div className='font-semibold text-blue-900'>{testimonial.author}</div>
+                        <div className='text-sm text-blue-600'>{testimonial.role}</div>
                       </footer>
                     </blockquote>
                   </CardContent>

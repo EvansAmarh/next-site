@@ -30,7 +30,7 @@ const onSubmit = handleSubmit(async (data) => {
      <DialogContent>
         <DialogHeader>
          <DialogTitle>Create New Collection</DialogTitle>
-         {loading && <BarLoader color='pink' width={"100%"} />}
+         {loading && <BarLoader color='blue' width={"100%"} />}
 
          <form onSubmit={onSubmit} className='space-y-2'>
             <div className='space-y-2'>
@@ -52,7 +52,7 @@ const onSubmit = handleSubmit(async (data) => {
 
             <div className='flex justify-end gap-4'>
                 <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit" className="bg-pink-600">Create Collection</Button>
+                <Button type="submit" className="bg-blue-600">Create Collection</Button>
             </div>
          </form>
         </DialogHeader>

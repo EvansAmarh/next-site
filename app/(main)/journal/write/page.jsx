@@ -181,7 +181,7 @@ const JournalEntryPage = () => {
             <h1 className='text-5xl md:text-6xl gradient-title'>
               {isEditMode ? "Edit Entry" : "What's on your mind?"}
             </h1>
-            {isLoading && <BarLoader color="pink" width="100%"/>}
+            {isLoading && <BarLoader color="blue" width="100%"/>}
 
             <div className='space-y-2'>
                 <label className='text-sm font-medium'>Title</label>
@@ -277,7 +277,7 @@ const JournalEntryPage = () => {
                           </SelectItem>)
                         })}
                         <SelectItem value="new">
-                           <span className='text-pink-600'>
+                           <span className='text-blue-600'>
                             + Create New Collection
                            </span>
                         </SelectItem>                       
@@ -299,7 +299,7 @@ const JournalEntryPage = () => {
                 Save as Draft
               </Button>
              )}
-             <Button type="submit" className="bg-pink-600" disabled={actionLoading}>
+             <Button type="submit" className="bg-blue-600" disabled={actionLoading}>
               {isEditMode ? "Update" : "Publish"}
              </Button>
              {isEditMode && (

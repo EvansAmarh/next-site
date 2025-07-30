@@ -67,7 +67,7 @@ const JournalFilters = ({entries}) => {
 
         <Popover>
          <PopoverTrigger asChild>
-            <Button className={cn("bg-pink-600 justify-start text-left font-normal", !date && "text-muted-foreground")}>
+            <Button className={cn("bg-blue-600 justify-start text-left font-normal", !date && "text-muted-foreground")}>
                 <CalendarIcon className='h-4 w-4' />
                 {date?format(date, "PPP") : <span>Pick a Date</span>}
             </Button>
@@ -83,7 +83,7 @@ const JournalFilters = ({entries}) => {
         </Popover>
 
         {(searchQuery||selectedMood||date) && (
-            <Button variant="ghost" className="text-pink-600" onClick={clearFilters}>Clear Filters</Button>
+            <Button variant="ghost" className="text-blue-600" onClick={clearFilters}>Clear Filters</Button>
         )}
      </div>
      <div className='text-sm text-gray-500'>

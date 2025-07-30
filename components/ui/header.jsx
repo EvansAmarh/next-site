@@ -52,11 +52,11 @@ const Header = () => {
       <nav className="py-6 px-4 flex justify-between items-center">
         <Link href={"/"}>
           <Image
-            src={"/likelogo.png"}
+            src="/logo.png"
             alt="Gym logo"
-            width={60}
-            height={40}
-            className="h-20 w-auto object-contain"
+            width={1080}
+            height={1000}
+            className="h-32 w-auto object-contain"
           />
         </Link>
 
@@ -71,7 +71,7 @@ const Header = () => {
           )}
 
           <Link href="/journal/write">
-            <Button className="bg-pink-600 flex items-center gap-2">
+            <Button className="bg-blue-600 flex items-center gap-2">
               <PenBox size={18} />
               <span className="hidden md:inline">Write New</span>
             </Button>

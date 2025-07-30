@@ -45,7 +45,7 @@ const MoodAnalytics = () => {
       return (
         <div className='bg-white p-4 border rounded-lg shadow-lg'>
           <p className='font-medium'>{format(parseISO(label), "MMM d yyyy")}</p>
-          <p className='text-pink-600'>Average mood: {payload[0].value}</p>
+          <p className='text-blue-600'>Average mood: {payload[0].value}</p>
            <p className='text-blue-600'>Entries: {payload[1].value}</p>
         </div>
       )
